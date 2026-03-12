@@ -7,28 +7,28 @@ import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
-  private jwtExpirationTimeInSeconds: number;
-  constructor(
-    private readonly usersService: UsersService,
-    private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
-  ) {
-    this.jwtExpirationTimeInSeconds = +this.configService.get<number>(
-      'JWT_EXPIRATION_TIME',
-    )!;
-  }
-
-  signIn(username: string, password: string): AuthResponseDto {
-    const foundUser = this.usersService.findByUserName(username);
-
-    if (!foundUser || !bcryptCompareSync(password, foundUser.password)) {
-      throw new UnauthorizedException();
+    private jwtExpirationTimeInSeconds: number;
+    constructor(
+        private readonly usersService: UsersService,
+        private readonly jwtService: JwtService,
+        private readonly configService: ConfigService,
+    ) {
+        this.jwtExpirationTimeInSeconds = +this.configService.get<number>(
+            'JWT_EXPIRATION_TIME',
+        )!;
     }
 
-    const payload = { sub: foundUser.id, username: foundUser.username };
+    signIn(username: string, password: string): AuthResponseDto {
+        const foundUser = this.usersService.findByUserName(username);
 
-    const token = this.jwtService.sign(payload);
+        if (!foundUser || !bcryptCompareSync(password, foundUser.password)) {
+            throw new UnauthorizedException();
+        }
 
-    return { token, expiresIn: this.jwtExpirationTimeInSeconds };
-  }
+        const payload = { sub: foundUser.id, username: foundUser.username };
+
+        const token = this.jwtService.sign(payload);
+
+        return { token, expiresIn: this.jwtExpirationTimeInSeconds };
+    }
 }
